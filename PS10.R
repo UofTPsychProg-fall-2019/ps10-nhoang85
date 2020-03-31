@@ -1,5 +1,10 @@
+setwd('C:/Users/hoang/Documents/0_MASTERS/Programming/ps10-nhoang85')
+getwd()
+
 library(tidyverse)
+install.packages("Hmisc")
 library(Hmisc)
+
 
 # This problem set will test out your ggploting skills using the Big 5 health dataset 
 # that you wrangled in problem set 9
@@ -57,7 +62,20 @@ ipip.l <- ipip %>%
 # create a boxplot that visualizes BMI distributions according to exercise habits, separately for females and males
 # include at least two customizations to the look of the boxplot 
 # check the documentation for options
-Q1 <- ggplot()
+Q1 <-ipip %>% 
+    ggplot(aes(x = exer, y = BMI, color = gender)) +
+    geom_boxplot( notch = TRUE) +
+    scale_color_manual(values=c("blueviolet", "cyan"))+
+    theme_bw(base_size = 14) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title='Body Mass Index (BMI) by Exercise frequency',
+         x='Exercise', y='BMI')
+
+Q1 <- Q1 + theme(plot.title=element_text(size=16, face="bold", color="tomato", hjust=0.5, lineheight=1.2),
+             axis.title.x=element_text(vjust=-1, size=15),
+             axis.title.y=element_text(vjust=3,size=15),
+             axis.text.x=element_text(size=10),
+             axis.text.y=element_text(size=10))
 Q1
 ggsave('figures/Q1.pdf',units='in',width=4,height=5)
 
@@ -65,15 +83,45 @@ ggsave('figures/Q1.pdf',units='in',width=4,height=5)
 
 # create a scatter plot to visualize the relationship between income and BMI, coloring points according to gender
 # use geom_smooth to add linear model fit lines, separately for males and females
-Q2a <- ggplot(ipip,aes(x=logMedInc,y=BMI, color=gender))+
+Q2a <- ipip %>%  
+    ggplot(aes(x=logMedInc,y=BMI, color=gender))+
     geom_point(size=.5,alpha=.4)+
-    geom_smooth(method='lm')
+    scale_color_manual(values=c("blueviolet", "cyan"))+
+    geom_smooth(method='lm') +
+    theme_bw(base_size = 14) +
+    theme(legend.position = c(.85, .85),legend.background=element_blank()) +
+    labs(title='Body Mass Index (BMI) by Income',
+         x='Income', y='BMI')
+
+Q2a <- Q2a + theme(plot.title=element_text(size=16, face="bold", color="forestgreen", hjust=0.5, lineheight=1.2),
+                 axis.title.x=element_text(vjust=-1, size=15),
+                 axis.title.y=element_text(vjust=3,size=15),
+                 axis.text.x=element_text(size=10),
+                 axis.text.y=element_text(size=10))
+
 Q2a
 ggsave('figures/Q2a.pdf',units='in',width=4,height=5)
 
 # there are some outlying lower income points, especially for females
 # recreate this graph filtering for log median income>10
-Q2b <- ggplot()
+Q2b <- ipip %>%  
+    filter(logMedInc >10) %>% 
+    ggplot(aes(x=logMedInc,y=BMI, color=gender))+
+    geom_point(size=1.0,alpha=.4)+
+    scale_color_manual(values=c("blueviolet", "cyan"))+
+    geom_smooth(method='lm') +
+    theme_bw(base_size = 14) +
+    theme(legend.position = c(.85, .85),legend.background=element_blank()) +
+    labs(title='Body Mass Index (BMI) by Income',
+         x='Income', y='BMI')
+
+Q2b <- Q2b + theme(plot.title=element_text(size=16, face="bold", color="forestgreen", hjust=0.5, lineheight=1.2),
+                   axis.title.x=element_text(vjust=-1, size=15),
+                   axis.title.y=element_text(vjust=3,size=15),
+                   axis.text.x=element_text(size=10),
+                   axis.text.y=element_text(size=10))
+
+
 Q2b
 ggsave('figures/Q2b.pdf',units='in',width=4,height=5)
 
@@ -85,7 +133,20 @@ ggsave('figures/Q2b.pdf',units='in',width=4,height=5)
 # the default range on the y-axis will be very large given the range of the data
 # add a +coord_cartesian(ylim = c(10, 12)) to rescale it.
 
-Q3 <- ggplot()
+Q3 <- ipip %>%  
+    ggplot(aes(x= gender,y=logMedInc, color = exer, fill=exer))+
+    stat_summary(fun.y=mean, geom="bar", position=position_dodge(width=.9), alpha = .4) +
+    stat_summary(fun.data='mean_cl_boot', geom="errorbar", position=position_dodge(width=.9), width=.3) +
+    coord_cartesian(ylim = c(10, 12)) +
+    theme_bw(base_size = 14) +
+    labs(title='Gender Differences in Average Income As Function of Exercise Rate',
+         x='Gender', y='Average Income (logMedInc)')
+
+Q3 <- Q3 + theme(plot.title=element_text(size=8, face="bold", color="blue1", hjust=0.5, lineheight=1.2),
+                   axis.title.x=element_text(vjust=-1, size=15),
+                   axis.title.y=element_text(vjust=3,size=15),
+                   axis.text.x=element_text(size=10),
+                   axis.text.y=element_text(size=10))
 Q3
 ggsave('figures/Q3.pdf',units='in',width=4,height=5)
 
@@ -95,7 +156,21 @@ ggsave('figures/Q3.pdf',units='in',width=4,height=5)
 # for each BMI category, separately for males and females
 # this is a lot to visualize in a single plot! use +facet_wrap(vars(trait)) to generate seperate plots for each personality trait
 
-Q4 <- ggplot()
+Q4 <- ipip.l %>%  
+    ggplot(aes(x=BMI_cat,y=value, color=gender))+
+    stat_summary(fun.data='mean_cl_boot', geom="pointrange",position=position_dodge(.5)) +
+    scale_color_manual(values=c("blueviolet", "cyan"))+
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    facet_wrap(vars(trait)) +
+    labs(title='Gender Differences in Mean Personality Trait As Function of BMI Category',
+     x='BMI Category', y='Mean Trait Value')
+
+Q4 <- Q4 + theme(plot.title=element_text(size=7, face="bold", color="darkmagenta", hjust=0.5, lineheight=1.2),
+                 axis.title.x=element_text(vjust=-1, size=15),
+                 axis.title.y=element_text(vjust=2,size=15),
+                 axis.text.x=element_text(size=10),
+                 axis.text.y=element_text(size=10))
 Q4
 ggsave('figures/Q4.pdf',units='in',width=4,height=5)
 
@@ -104,12 +179,27 @@ ggsave('figures/Q4.pdf',units='in',width=4,height=5)
 
 # use dplyr functions to calculate the mean of each personality trait for each combination of gender, BMI group
 ipip.g <- ipip.l %>%
-    ...
+    group_by(trait,gender, BMI_cat) %>% 
+    summarise(Big5_mean = mean(value))
 
 
 # plot the average value of personality trait (colored as separate lines), according to the BMI category
 # facet_warp gender so that you can see these relationships separately for females and males
-Q5 <- ggplot()
+Q5 <- ipip.g %>% 
+    ggplot(aes(x=BMI_cat, y= Big5_mean, color = trait, group = trait))+
+    geom_point()+
+    geom_line()+
+    facet_wrap(~gender) +
+    theme_bw(base_size = 14) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title='Gender Differences in Mean Personality Trait As Function of BMI Category',
+         x='BMI Category', y='Mean Trait Value')
+
+Q5 <- Q5 + theme(plot.title=element_text(size=7, face="bold", color="firebrick1", hjust=0.5, lineheight=1.2),
+                 axis.title.x=element_text(vjust=-1, size=15),
+                 axis.title.y=element_text(vjust=2,size=15),
+                 axis.text.x=element_text(size=10),
+                 axis.text.y=element_text(size=10))
 Q5
 ggsave('figures/Q5.pdf',units='in',width=4,height=5)
     
